@@ -4,16 +4,22 @@ import { TouchableOpacity } from "react-native";
 
 export default function ProductLayout() {
     return (
-       <Stack>
+       <Stack screenOptions={{
+           headerShown: true,
+           headerStyle: {
+               backgroundColor: 'white',
+           },
+           headerShadowVisible: false,
+       }}>
         <Stack.Screen
         name="[slug]"
-        options={({navigation}) => ({
-            headerShown : true,
-            headerLeft : () => (
+        options={({navigation, route}) => ({
+            headerLeft: () => (
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color="black"/>
                 </TouchableOpacity>
-            )
+            ),
+            headerTitle: route.params?.title || '',
         })}/>
        </Stack>
     )

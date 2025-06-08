@@ -1,13 +1,16 @@
-import { Product } from "@/assets/types/product"
+import { Product } from "@/assets/types/product";
 import { Link } from "expo-router";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native"
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Props {
     product : Product
 }
 export const ProductListItem = ({product} : Props) => {
     return (
-        <Link href={`/products/${product.slug}` as any} asChild>
+        <Link asChild href={{
+            pathname: `/products/${product.slug}`,
+            params: { title: product.title }
+        }}>
         <Pressable style={styles.item}>
          <View style={styles.itemImageContainer}>
             <Image source={product.heroImage} style={styles.itemImage} />

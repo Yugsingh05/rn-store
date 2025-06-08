@@ -24,24 +24,27 @@ export default function RootLayout() {
             paddingTop: 10,
           },
           headerShown: false,
+          headerStyle: {
+            backgroundColor: 'white',
+          },
         }}
       >
         <Tabs.Screen
           name="index"
           options={{
-           title: 'Shop',
-           tabBarIcon(props) {
-            return <TabBarIcon name="shopping-cart" {...props} />
-           },
+            title: 'Shop',
+            tabBarIcon(props) {
+              return <TabBarIcon name="shopping-cart" {...props} />
+            },
           }}
         />
         <Tabs.Screen
           name="orders"
           options={{
-           title: 'Orders',
-           tabBarIcon(props) {
-            return <TabBarIcon name="book" {...props} />
-           },
+            title: 'Orders',
+            tabBarIcon(props) {
+              return <TabBarIcon name="book" {...props} />
+            },
           }}
         />
       </Tabs>
