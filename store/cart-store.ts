@@ -1,7 +1,7 @@
 import { PRODUCTS } from "@/assets/products";
 import { create } from "zustand";
 
-type cartItemType = {
+export type cartItemType = {
   id: number;
   title: string;
   image: string[];

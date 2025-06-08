@@ -54,6 +54,7 @@ const ProductDetails = () => {
   };
 
   const addToCart = () => {
+    console.log(products);
     addItem({
         id : products.id,
         title : products.title,
