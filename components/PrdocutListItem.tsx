@@ -1,5 +1,5 @@
 import { Product } from "@/assets/types/product";
-import { Link } from "expo-router";
+import { Link, RelativePathString } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
 export const ProductListItem = ({product} : Props) => {
     return (
         <Link asChild href={{
-            pathname: `/products/${product.slug}`,
+            pathname: `/products/${product.slug}` as RelativePathString,
             params: { title: product.title }
         }}>
         <Pressable style={styles.item}>

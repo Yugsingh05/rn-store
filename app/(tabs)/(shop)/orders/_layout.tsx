@@ -7,6 +7,10 @@ export default  function OrdersLayout(){
                 name="index"
                 options={{ headerShown: false}}
             />
+            <Stack.Screen
+                name="[slug]"
+                options={{ headerShown: true, title: 'Order Details'}}
+            />
     
         </Stack>
     )
