@@ -4,6 +4,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { PRODUCTS } from '@/assets/products';
 import { ProductListItem } from '@/components/PrdocutListItem';
 import { ListHeader } from '@/components/ListHeader';
+import Auth from '../auth';
 
 export default function HomeScreen() {
   return (
@@ -19,6 +20,7 @@ export default function HomeScreen() {
      
      />
    </View>
+  // <Auth/>
   );
 }
 

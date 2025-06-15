@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, FlatList, Image } from "react-native";
-import React from "react";
-import { Redirect, Stack, useLocalSearchParams } from "expo-router";
 import { ORDERS } from "@/assets/orders";
+import { Redirect, Stack, useLocalSearchParams } from "expo-router";
+import React from "react";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 
 const OrderDetails = () => {
   const { slug } = useLocalSearchParams();
@@ -9,30 +9,41 @@ const OrderDetails = () => {
   const order = ORDERS.find((order) => order.id.toString() === slug);
 
   if (!order) return <Redirect href={"/+not-found"} />;
+  
   return (
-    <View style={styles.container}>
-      <Text style={styles.item}>{order.item}</Text>
-      <Text style={styles.details}>{order.details}</Text>
-      <View style={[styles.statusBadge, styles[`statusBadge_${order.status}`]]}>
-        <Text style={styles.statusText}>{order.status}</Text>
-      </View>
-      <Text style={styles.date}>{order.date}</Text>
-      <Text style={styles.itemsTitle}>Items OrderId:</Text>
-      <FlatList
-      data={order.items}
-      keyExtractor={item => item.id.toString()}
-      renderItem={({item}) => (
-        <View style={styles.orderItem}>
-            <Image source={item.heroImage} style={styles.heroImage}/>
-            <View style={styles.itemInfo}>
+    <>
+      <Stack.Screen 
+        options={{
+          title: order.item,
+          headerStyle: {
+            backgroundColor: 'white',
+          },
+          headerShadowVisible: false,
+        }}
+      />
+      <View style={styles.container}>
+        <Text style={styles.item}>{order.item}</Text>
+        <Text style={styles.details}>{order.details}</Text>
+        <View style={[styles.statusBadge, styles[`statusBadge_${order.status}`]]}>
+          <Text style={styles.statusText}>{order.status}</Text>
+        </View>
+        <Text style={styles.date}>{order.date}</Text>
+        <Text style={styles.itemsTitle}>Items OrderId:</Text>
+        <FlatList
+          data={order.items}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({item}) => (
+            <View style={styles.orderItem}>
+              <Image source={item.heroImage} style={styles.heroImage}/>
+              <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.title}</Text>
                 <Text style={styles.itemPrice}>Price : ${item.price}</Text>
-
+              </View>
             </View>
-
-        </View>
-      )}/>
-    </View>
+          )}
+        />
+      </View>
+    </>
   );
 };
 

@@ -1,12 +1,17 @@
 import { CATEGORIES } from "@/assets/categories";
+import { supabase } from "@/lib/supabase";
 import { useCartStore } from "@/store/cart-store";
 import { FontAwesome } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export const ListHeader = () => {
 
   const {getItemCount} = useCartStore()
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  }
   return (
     <View style={[styles.headerContainer]}>
       <View style={styles.headerTop}>
@@ -36,6 +41,11 @@ export const ListHeader = () => {
             )}
         </Pressable>
         </Link>
+
+        <TouchableOpacity onPress={() => handleSignOut()} style={styles.signOutButton}>
+          <FontAwesome name="sign-out" size={25} color={'red'}/>
+
+        </TouchableOpacity>
        </View>
       </View>
       <View style={styles.heroContainer}>

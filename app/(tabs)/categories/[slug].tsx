@@ -1,14 +1,12 @@
 import { CATEGORIES } from '@/assets/categories';
 import { PRODUCTS } from '@/assets/products';
 import { ProductListItem } from '@/components/PrdocutListItem';
-import { Redirect, Stack, useLocalSearchParams } from 'expo-router'
-import React from 'react'
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native'
+import { Redirect, Stack, useLocalSearchParams } from 'expo-router';
+import React from 'react';
+import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 export default function Category () {
-
   const {slug} = useLocalSearchParams<{slug: string}>();
-
   const category = CATEGORIES.find(category => category.slug === slug);
 
   if(!category) return <Redirect href={'/+not-found'} />
@@ -16,20 +14,30 @@ export default function Category () {
   const products = PRODUCTS.filter(product => product.category.slug === slug);
 
   return (
-       <View style={styles.container}>
-         <Stack.Screen options={{title: category.name}}/>
-         <Image source={{uri : category.imageUrl}} style={styles.categoryImage} />
-         <Text style={styles.categoryName}>{category.name}</Text>
+    <>
+      <Stack.Screen 
+        options={{
+          title: category.name,
+          headerStyle: {
+            backgroundColor: 'white',
+          },
+          headerShadowVisible: false,
+        }}
+      />
+      <View style={styles.container}>
+        <Image source={{uri : category.imageUrl}} style={styles.categoryImage} />
+        <Text style={styles.categoryName}>{category.name}</Text>
 
-         <FlatList
-         data={products}
-         keyExtractor={item => item.id.toString()}
-         renderItem={({item}) => <ProductListItem product={item}/>}
-         numColumns={2}
-         columnWrapperStyle={styles.productRow}
-         contentContainerStyle={styles.productsList}/>
-         
-       </View>
+        <FlatList
+          data={products}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({item}) => <ProductListItem product={item}/>}
+          numColumns={2}
+          columnWrapperStyle={styles.productRow}
+          contentContainerStyle={styles.productsList}
+        />
+      </View>
+    </>
   )
 }
 

@@ -1,16 +1,16 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
-import React, { useState } from "react";
-import { Redirect, Stack, useLocalSearchParams } from "expo-router";
-import { useToast } from "react-native-toast-notifications";
 import { PRODUCTS } from "@/assets/products";
 import { useCartStore } from "@/store/cart-store";
+import { Redirect, Stack, useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
+import {
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useToast } from "react-native-toast-notifications";
 
 const ProductDetails = () => {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -71,64 +71,73 @@ const ProductDetails = () => {
   const totalPrice = (products.price * quantity).toFixed(2);
 
   return (
-    <View style={styles.container}>
-      <Stack.Screen options={{ title: products.title }} />
+    <>
+      <Stack.Screen 
+        options={{
+          title: products.title,
+          headerStyle: {
+            backgroundColor: 'white',
+          },
+          headerShadowVisible: false,
+        }}
+      />
+      <View style={styles.container}>
+        <Image source={products.heroImage} style={styles.heroImage} />
 
-      <Image source={products.heroImage} style={styles.heroImage} />
+        <View style={styles.content}>
+          <Text style={styles.title}>Title : {products.title}</Text>
+          <Text style={styles.slug}>Slug : {products.slug}</Text>
+          <View style={styles.priceContainer}>
+            <Text style={styles.price}>
+              Unit Price : ${products.price.toFixed(2)}
+            </Text>
+            <Text style={styles.price}>Total Price : ${totalPrice}</Text>
+          </View>
 
-      <View style={{ padding: 16, flex: 1 }}>
-        <Text style={styles.title}>Title : {products.title}</Text>
-        <Text style={styles.slug}>Slug : {products.slug}</Text>
-        <View style={styles.priceContainer}>
-          <Text style={styles.price}>
-            Unit Price : ${products.price.toFixed(2)}
-          </Text>
-          <Text style={styles.price}>Total Price : ${totalPrice}</Text>
-        </View>
+          <FlatList
+            data={products.imagesUrl}
+            keyExtractor={(items, index) => index.toString()}
+            renderItem={({ item }) => (
+              <Image source={item} style={styles.image} />
+            )}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.imagesContainer}
+          />
 
-        <FlatList
-          data={products.imagesUrl}
-          keyExtractor={(items, index) => index.toString()}
-          renderItem={({ item }) => (
-            <Image source={item} style={styles.image} />
-          )}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.imagesContainer}
-        />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={decreaseQuantity}
+              disabled={quantity <= 1}
+            >
+              <Text style={styles.quantityButtonText}>-</Text>
+            </TouchableOpacity>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={decreaseQuantity}
-            disabled={quantity <= 1}
-          >
-            <Text style={styles.quantityButtonText}>-</Text>
-          </TouchableOpacity>
+            <Text style={styles.quantity}>{quantity}</Text>
 
-          <Text style={styles.quantity}>{quantity}</Text>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={increaseQuantity}
+              disabled={quantity >= products.maxQuantity}
+            >
+              <Text style={styles.quantityButtonText}>+</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={increaseQuantity}
-            disabled={quantity >= products.maxQuantity}
-          >
-            <Text style={styles.quantityButtonText}>+</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.addToCartButton,
-              { opacity: quantity === 0 ? 0.5 : 1 },
-            ]}
-            onPress={addToCart}
-            disabled={quantity === 0}
-          >
-            <Text style={styles.addToCartText}>Add to Cart</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.addToCartButton,
+                { opacity: quantity === 0 ? 0.5 : 1 },
+              ]}
+              onPress={addToCart}
+              disabled={quantity === 0}
+            >
+              <Text style={styles.addToCartText}>Add to Cart</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </>
   );
 };
 
@@ -217,5 +226,9 @@ const styles = StyleSheet.create({
     color: "#f00",
     textAlign: "center",
     marginTop: 20,
+  },
+  content: {
+    padding: 16,
+    flex: 1,
   },
 });

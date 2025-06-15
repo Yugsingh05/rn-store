@@ -1,5 +1,6 @@
+import { useAuth } from "@/providers/AuthProvider";
 import { FontAwesome } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { ComponentProps } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -11,6 +12,11 @@ function TabBarIcon(props: {
 }
 
 export default function RootLayout() {
+  const { session, mounting } = useAuth();
+
+  if (mounting) return null;
+  if (!session) return <Redirect href="/auth" />;
+
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <Tabs
@@ -25,25 +31,25 @@ export default function RootLayout() {
           },
           headerShown: false,
           headerStyle: {
-            backgroundColor: 'white',
+            backgroundColor: "white",
           },
         }}
       >
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Shop',
+            title: "Shop",
             tabBarIcon(props) {
-              return <TabBarIcon name="shopping-cart" {...props} />
+              return <TabBarIcon name="shopping-cart" {...props} />;
             },
           }}
         />
         <Tabs.Screen
           name="orders"
           options={{
-            title: 'Orders',
+            title: "Orders",
             tabBarIcon(props) {
-              return <TabBarIcon name="book" {...props} />
+              return <TabBarIcon name="book" {...props} />;
             },
           }}
         />

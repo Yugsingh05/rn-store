@@ -19,7 +19,6 @@ export default function ProductLayout() {
                     <Ionicons name="arrow-back" size={24} color="black"/>
                 </TouchableOpacity>
             ),
-            headerTitle: route.params?.title || '',
         })}/>
        </Stack>
     )
