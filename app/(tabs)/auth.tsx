@@ -11,12 +11,20 @@ import * as Yup from "yup";
 import { supabase } from "@/lib/supabase";
 import { Toast } from "react-native-toast-notifications";
 import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Redirect } from "expo-router";
 
 export default function Auth() {
-  const { session, user } = useAuth();
-  const [isSignIn, setIsSignIn] = useState(false);
+  const { session } = useAuth();
+  const [isSignIn, setIsSignIn] = useState(true); // Default to sign in
+  const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (session) {
+      router.replace("/(tabs)/(shop)");
+    }
+  }, [session]);
 
   const validationSchema = Yup.object().shape({
     email: Yup.string()
@@ -32,52 +40,81 @@ export default function Auth() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
       if (isSignIn) {
-        const data = await signIn(values);
-        console.log("data", data);
-
-        if(data)  return <Redirect href={"/(tabs)/(shop)"} />;
+        await signIn(values);
       } else {
-        const data = await SignUp(values);
-        console.log("data", data);
-        if(data)  return <Redirect href={"/(tabs)/(shop)"} />;
+        await signUp(values);
       }
     },
   });
 
-  const signIn = async (data: { email: string; password: string }) => {
-    const { error, data: res } = await supabase.auth.signInWithPassword(data);
+  const signIn = async (values: { email: string; password: string }) => {
+    const { error, data } = await supabase.auth.signInWithPassword(values);
 
     if (error) {
-      alert(error.message);
-    } else {
-      Toast.show("Signed in successfully", {
-        type: "success",
+      console.error("Sign In Error:", error.message);
+      Toast.show(error.message, {
+        type: "danger",
         placement: "top",
-        duration: 1500,
+        duration: 3000,
       });
+      return;
     }
-    return res;
+
+    Toast.show("Signed in successfully", {
+      type: "success",
+      placement: "top",
+      duration: 1500,
+    });
+
+    router.push("/(tabs)/(shop)");
   };
 
-  const SignUp = async (data: { email: string; password: string }) => {
-    const { error, data: res } = await supabase.auth.signUp(data);
+  const signUp = async (values: { email: string; password: string }) => {
+    const { error, data } = await supabase.auth.signUp(values);
 
-    console.log("res");
     if (error) {
-      alert(error.message);
-    } else {
-      Toast.show("Signed up successfully", {
-        type: "success",
+      console.error("Sign Up Error:", error.message);
+      Toast.show(error.message, {
+        type: "danger",
         placement: "top",
-        duration: 1500,
+        duration: 3000,
       });
+      return;
     }
-    return res;
+
+    Toast.show("Signed up successfully!", {
+      type: "success",
+      placement: "top",
+      duration: 1500,
+    });
+
+    // Optionally auto-sign in user after sign up
+    if (data.user && !data.session) {
+      Toast.show("Check email to confirm account.", {
+        type: "normal",
+        placement: "top",
+        duration: 4000,
+      });
+    } else {
+      router.push("/(tabs)/(shop)");
+    }
   };
 
-  if (session) return <Redirect href={"/(tabs)/(shop)"} />;
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      console.error("Google Sign-In Error:", error.message);
+      Toast.show("Google sign-in failed.", {
+        type: "danger",
+        placement: "top",
+        duration: 3000,
+      });
+    }
+  };
 
   return (
     <ImageBackground
@@ -88,12 +125,15 @@ export default function Auth() {
     >
       <View style={styles.overlay} />
       <View style={styles.container}>
-        <Text style={styles.title}>Welcome to the App</Text>
-        <Text style={styles.subtitle}>Please sign in to continue</Text>
+        <Text style={styles.title}>{isSignIn ? "Sign In" : "Sign Up"}</Text>
+        <Text style={styles.subtitle}>
+          {isSignIn
+            ? "Log in to continue shopping"
+            : "Create an account to start shopping"}
+        </Text>
       </View>
 
       <TextInput
-        id="email"
         placeholder="Email"
         style={styles.input}
         value={formik.values.email}
@@ -104,14 +144,12 @@ export default function Auth() {
         autoComplete="email"
         autoCorrect={false}
         autoFocus={true}
-        nativeID="email"
       />
-      {formik.errors.email && formik.touched.email && (
+      {formik.touched.email && formik.errors.email && (
         <Text style={styles.error}>{formik.errors.email}</Text>
       )}
 
       <TextInput
-        id="password"
         placeholder="Password"
         style={styles.input}
         value={formik.values.password}
@@ -122,28 +160,41 @@ export default function Auth() {
         autoComplete="password"
         autoCorrect={false}
         secureTextEntry={true}
-        nativeID="password"
       />
-      {formik.errors.password && formik.touched.password && (
+      {formik.touched.password && formik.errors.password && (
         <Text style={styles.error}>{formik.errors.password}</Text>
       )}
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          setIsSignIn(true)
-          formik.handleSubmit()
-        }}
+        onPress={() => formik.handleSubmit()}
         disabled={formik.isSubmitting}
       >
-        <Text style={styles.buttonText}>Sign In</Text>
+        <Text style={styles.buttonText}>
+          {formik.isSubmitting
+            ? "Processing..."
+            : isSignIn
+            ? "Sign In"
+            : "Sign Up"}
+        </Text>
       </TouchableOpacity>
 
+      {/* Toggle Between Sign In / Sign Up */}
       <TouchableOpacity
-        style={styles.button}
-        onPress={() => formik.handleSubmit()}
+        style={[styles.button, styles.secondaryButton]}
+        onPress={() => setIsSignIn(!isSignIn)}
       >
-        <Text style={styles.buttonText}>Sign up</Text>
+        <Text style={styles.secondaryButtonText}>
+          {isSignIn ? "Need an account? Sign Up" : "Already have an account?"}
+        </Text>
+      </TouchableOpacity>
+
+      {/* OAuth Button - Optional */}
+      <TouchableOpacity
+        style={[styles.button, styles.googleButton]}
+        onPress={signInWithGoogle}
+      >
+        <Text style={styles.buttonText}>Sign In with Google</Text>
       </TouchableOpacity>
     </ImageBackground>
   );
@@ -168,20 +219,21 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   title: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#ddd",
     marginBottom: 32,
+    textAlign: "center",
   },
   input: {
     width: "90%",
     padding: 12,
-    marginBottom: 16,
+    marginBottom: 12,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 8,
     fontSize: 16,
@@ -195,18 +247,22 @@ const styles = StyleSheet.create({
     width: "90%",
     alignItems: "center",
   },
-  signUpButton: {
-    backgroundColor: "transparent",
-    borderColor: "#fff",
-    borderWidth: 1,
-  },
-  signUpButtonText: {
-    color: "#fff",
-  },
   buttonText: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#fff",
+  },
+  secondaryButton: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#fff",
+  },
+  secondaryButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  googleButton: {
+    backgroundColor: "#db4437",
   },
   error: {
     color: "red",
