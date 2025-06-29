@@ -1,8 +1,9 @@
-import { PRODUCTS } from "@/assets/products";
+import { GetProductBySlug } from "@/api/api";
 import { useCartStore } from "@/store/cart-store";
 import { Redirect, Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
     FlatList,
     Image,
     StyleSheet,
@@ -16,22 +17,27 @@ const ProductDetails = () => {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const toast = useToast();
 
-  const products = PRODUCTS.find((product) => product.slug === slug);
+  const {data : products , isLoading , error} = GetProductBySlug(slug as string);
 
   const { items, addItem, incrementItem, decrementItem } = useCartStore();
 
-  const cartItem = items.find((item) => item.id === products?.id);
+  const cartItem = items.find((item) => item.id === products?.data.id);
 
   const initialQuantity = cartItem ? cartItem.quantity : 1;
 
   const [quantity, setQuantity] = useState(initialQuantity);
 
+  if(isLoading) return <ActivityIndicator/>
+
+  if(error) return <Text>Error {error?.message || 'Failed to fetch data'}</Text>
+
   if (!products) return <Redirect href={"/+not-found"} />;
 
+
   const increaseQuantity = () => {
-    if(quantity < products.maxQuantity){
+    if(quantity < products.data.maxQuantity){
         setQuantity(prev => prev + 1);
-        incrementItem(products.id);
+        incrementItem(products.data?.id);
     }
     else {
         toast.show('Cannot add more than maximum quantity', {
@@ -43,7 +49,7 @@ const ProductDetails = () => {
   const decreaseQuantity = () => {
     if(quantity > 1){
         setQuantity(prev => prev - 1);
-        decrementItem(products.id);
+        decrementItem(products.data?.id);
     }
     else {
         toast.show('Cannot add less than minimum quantity', {
@@ -56,10 +62,10 @@ const ProductDetails = () => {
   const addToCart = () => {
     console.log(products);
     addItem({
-        id : products.id,
-        title : products.title,
-        image : products.imagesUrl as string[],
-        price : products.price,
+        id : products.data.id,
+        title : products.data.title as string,
+        image : products.data.imagesUrl as string[],
+        price : products.data.price,
         quantity 
     })
     toast.show('Added tq cart',{
@@ -68,13 +74,13 @@ const ProductDetails = () => {
         duration : 1500
     })
   };
-  const totalPrice = (products.price * quantity).toFixed(2);
+  const totalPrice = (products.data.price * quantity).toFixed(2);
 
   return (
     <>
       <Stack.Screen 
         options={{
-          title: products.title,
+          title: products.data.title as string,
           headerStyle: {
             backgroundColor: 'white',
           },
@@ -82,23 +88,23 @@ const ProductDetails = () => {
         }}
       />
       <View style={styles.container}>
-        <Image source={products.heroImage} style={styles.heroImage} />
+        <Image source={{uri : products.data.heroImage}} style={styles.heroImage} />
 
         <View style={styles.content}>
-          <Text style={styles.title}>Title : {products.title}</Text>
-          <Text style={styles.slug}>Slug : {products.slug}</Text>
+          <Text style={styles.title}>Title : {products.data.title}</Text>
+          <Text style={styles.slug}>Slug : {products.data.slug}</Text>
           <View style={styles.priceContainer}>
             <Text style={styles.price}>
-              Unit Price : ${products.price.toFixed(2)}
+              Unit Price : ${products.data.price.toFixed(2)}
             </Text>
             <Text style={styles.price}>Total Price : ${totalPrice}</Text>
           </View>
 
           <FlatList
-            data={products.imagesUrl}
+            data={products.data.imagesUrl}
             keyExtractor={(items, index) => index.toString()}
             renderItem={({ item }) => (
-              <Image source={item} style={styles.image} />
+              <Image source={{ uri: item }} style={styles.image} />
             )}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -119,7 +125,7 @@ const ProductDetails = () => {
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={increaseQuantity}
-              disabled={quantity >= products.maxQuantity}
+              disabled={quantity >= products.data.maxQuantity}
             >
               <Text style={styles.quantityButtonText}>+</Text>
             </TouchableOpacity>

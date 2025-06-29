@@ -1,88 +1,97 @@
-import { CATEGORIES } from '@/assets/categories';
-import { PRODUCTS } from '@/assets/products';
-import { ProductListItem } from '@/components/PrdocutListItem';
-import { Redirect, Stack, useLocalSearchParams } from 'expo-router';
-import React from 'react';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { GetCategoriesWithProducts } from "@/api/api";
+import { ProductListItem } from "@/components/PrdocutListItem";
+import { Redirect, Stack, useLocalSearchParams } from "expo-router";
+import React from "react";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 
-export default function Category () {
-  const {slug} = useLocalSearchParams<{slug: string}>();
-  const category = CATEGORIES.find(category => category.slug === slug);
+export default function Category() {
+  const { slug } = useLocalSearchParams<{ slug: string }>();
 
-  if(!category) return <Redirect href={'/+not-found'} />
+  const { data, isLoading, error } = GetCategoriesWithProducts(slug);
 
-  const products = PRODUCTS.filter(product => product.category.slug === slug);
+//   console.log("data" , data);
+
+  if (isLoading) return <Text>Loading...</Text>;
+
+  if (error)
+    return <Text>Error {error?.message || "Failed to fetch data"}</Text>;
+  if (!data) return <Redirect href={"/+not-found"} />;
+
+  const { category, products } = data;
 
   return (
     <>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
-          title: category.name,
+          title: category.name as string,
           headerStyle: {
-            backgroundColor: 'white',
+            backgroundColor: "white",
           },
           headerShadowVisible: false,
         }}
       />
       <View style={styles.container}>
-        <Image source={{uri : category.imageUrl}} style={styles.categoryImage} />
+        <Image
+          source={{ uri: category.imageUrl }}
+          style={styles.categoryImage}
+        />
         <Text style={styles.categoryName}>{category.name}</Text>
 
-        <FlatList
-          data={products}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => <ProductListItem product={item}/>}
-          numColumns={2}
-          columnWrapperStyle={styles.productRow}
-          contentContainerStyle={styles.productsList}
-        />
+       {products !== null ?  <FlatList
+                                        data={products}
+                                        keyExtractor={(item) => item.id.toString()}
+                                        renderItem={({ item }) => <ProductListItem product={item} />}
+                                        numColumns={2}
+                                        columnWrapperStyle={styles.productRow}
+                                        contentContainerStyle={styles.productsList}
+                                      /> : <Text>No products found</Text>}
       </View>
     </>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
   },
   categoryImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
-    resizeMode: 'cover',
+    resizeMode: "cover",
     borderRadius: 8,
     marginBottom: 16,
   },
   categoryName: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   productsList: {
     flexGrow: 1,
   },
   productRow: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   productContainer: {
     flex: 1,
     margin: 8,
   },
   productImage: {
-    width: '100%',
+    width: "100%",
     height: 150,
-    resizeMode: 'cover',
+    resizeMode: "cover",
     borderRadius: 8,
   },
   productTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 8,
   },
   productPrice: {
     fontSize: 14,
-    color: '#888',
+    color: "#888",
     marginTop: 4,
   },
 });

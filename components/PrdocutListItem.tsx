@@ -1,9 +1,9 @@
-import { Product } from "@/assets/types/product";
+import {  Tables } from "@/types/database.types";
 import { Link, RelativePathString } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Props {
-    product : Product
+    product : Tables<'products'>
 }
 export const ProductListItem = ({product} : Props) => {
     return (
@@ -13,7 +13,7 @@ export const ProductListItem = ({product} : Props) => {
         }}>
         <Pressable style={styles.item}>
          <View style={styles.itemImageContainer}>
-            <Image source={product.heroImage} style={styles.itemImage} />
+            <Image source={{uri : product.heroImage}} style={styles.itemImage} />
          </View>
          <View style={styles.itemTextContainer}>
             <Text style={styles.itemTitle}>{product.title}</Text>
