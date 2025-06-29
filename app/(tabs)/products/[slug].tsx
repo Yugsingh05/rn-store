@@ -60,7 +60,7 @@ const ProductDetails = () => {
   };
 
   const addToCart = () => {
-    console.log(products);
+
     addItem({
         id : products.data.id,
         title : products.data.title as string,

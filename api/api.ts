@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/providers/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 export const GetProductsAndCategories = () => {
@@ -53,14 +54,36 @@ export const GetCategoriesWithProducts = (categorySlug: string) => {
       const { data: products, error: productError } = await supabase
         .from("products")
         .select("*")
-        .eq("category",category.id);
+        .eq("category", category.id);
 
       if (productError) {
         throw new Error("Failed to fetch products" + productError?.message);
       }
 
-
       return { category, products };
+    },
+  });
+};
+
+export const GetMyorders = () => {
+  const {
+    user: { id },
+  } = useAuth();
+
+  return useQuery({
+    queryKey: ["myorders", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .eq("user", id);
+
+        if(error) {
+          throw new Error(error.message);
+        }
+
+        return data;
     },
   });
 };

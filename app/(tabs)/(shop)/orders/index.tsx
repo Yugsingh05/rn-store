@@ -1,28 +1,21 @@
-import { ORDERS } from '@/assets/orders';
-import { Order, OrderStatus } from '@/assets/types/order';
+import { GetMyorders } from '@/api/api';
+import { Tables } from '@/types/database.types';
 import { Link, RelativePathString, Stack } from 'expo-router';
 import React from 'react';
-import { FlatList, ListRenderItem, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, ListRenderItem, Pressable, StyleSheet, Text, View } from 'react-native';
 
-const statusDisplayText : Record<OrderStatus,string> = {
-  Pending : 'Pending',
-  Completed : 'Completed',
-  Shipped : 'Shipped',
-  InTransit : 'InTransit'
-}
-
-const renderItem: ListRenderItem<Order> = ({item}) => (
+const renderItem: ListRenderItem<Tables<'order'>> = ({item}) => (
   <Link href={`/orders/${item.id}` as RelativePathString} asChild>
     <Pressable style={styles.orderContainer}>
       <View style={styles.orderContent}>
         <View style={styles.orderDetailsContainer}>
-          <Text style={styles.orderItem}>{item.item}</Text>
-          <Text style={styles.orderDetails}>{item.details}</Text>
-          <Text style={styles.orderDate}>{item.date}</Text>
+          <Text style={styles.orderItem}>{item.slug}</Text>
+          <Text style={styles.orderDetails}>{item.description}</Text>
+          <Text style={styles.orderDate}>{item.created_at}</Text>
         </View>
         <View style={[styles.statusBadge, styles[`statusBadge_${item.status}`]]}>
           <Text style={styles.statusText}>
-            {statusDisplayText[item.status]}
+            {item.status.toUpperCase()}
           </Text>
         </View>
       </View>
@@ -31,6 +24,21 @@ const renderItem: ListRenderItem<Order> = ({item}) => (
 )
 
 export default function order () {
+
+  const {data , error , isLoading} = GetMyorders()
+
+
+
+  if(isLoading) return <ActivityIndicator/>
+
+  if(error) return <Text>Error {error?.message || 'Failed to fetch data'}</Text>
+
+  if(data?.length === 0) return <Text style={{
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    fontFamily: 'serif',
+  }}>No orders found</Text>
   return (
     <>
       <Stack.Screen 
@@ -44,7 +52,7 @@ export default function order () {
       />
       <View style={styles.container}>
         <FlatList
-          data={ORDERS}
+          data={data}
           keyExtractor={item => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
@@ -54,7 +62,7 @@ export default function order () {
   )
 }
 
-const styles= StyleSheet.create({
+const styles : {[key: string]: any}= StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
