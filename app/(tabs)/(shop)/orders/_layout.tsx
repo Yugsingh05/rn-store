@@ -7,6 +7,9 @@ export default function OrdersLayout(){
         }}>
             <Stack.Screen
                 name="index"
+                options={{
+                    headerShown: false
+                }}
             />
             <Stack.Screen
                 name="[slug]"

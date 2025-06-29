@@ -4,6 +4,8 @@ import { Link, RelativePathString, Stack } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, FlatList, ListRenderItem, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import {format} from 'date-fns'
+
 const renderItem: ListRenderItem<Tables<'order'>> = ({item}) => (
   <Link href={`/orders/${item.id}` as RelativePathString} asChild>
     <Pressable style={styles.orderContainer}>
@@ -11,7 +13,7 @@ const renderItem: ListRenderItem<Tables<'order'>> = ({item}) => (
         <View style={styles.orderDetailsContainer}>
           <Text style={styles.orderItem}>{item.slug}</Text>
           <Text style={styles.orderDetails}>{item.description}</Text>
-          <Text style={styles.orderDate}>{item.created_at}</Text>
+          <Text style={styles.orderDate}>{format(new Date(item.created_at) , 'MMM dd, yyyy')}</Text>
         </View>
         <View style={[styles.statusBadge, styles[`statusBadge_${item.status}`]]}>
           <Text style={styles.statusText}>
